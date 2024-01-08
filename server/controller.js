@@ -3,18 +3,16 @@ import bcrypt from 'bcryptjs'
 
 const handlerFunctions = {
     register: async (req, res) => {
-        console.log(req.body)
+        // console.log(req.body)
         const {username, password} = req.body
 
-        const salt = bcrypt.genSaltSync(5) // Adds salt (aka extra characters)
-        const passHash = bcrypt.hashSync(password, salt) // Mixes extra characters together and adds even more
+        const salt = bcrypt.genSaltSync(5)
+        const passHash = bcrypt.hashSync(password, salt)
 
         const newUser = await User.create({
             username,
             password: passHash
         })
-
-
 
         res.send(newUser)
     },
@@ -23,19 +21,18 @@ const handlerFunctions = {
         // console.log(req.body)
         const {username, password} = req.body
 
-        const valid = await User.findOne({
+        const userCheck = await User.findOne({
             where:{
                 username: username,
             }}
         )
 
-        const passwordCheck = bcrypt.compareSync(password, valid.password)
+        const passwordCheck = bcrypt.compareSync(password, userCheck.password)
 
         if(passwordCheck){
-            res.send(valid)
-            return
+            res.send(userCheck)
         }else{
-            res.error('failure')
+            res.status(403).send('incorrect credentials')
         }
 
     }
